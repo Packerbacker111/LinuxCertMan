@@ -3,7 +3,7 @@ Author: Samuel Regelbrugge
 
 ## Description
 
-Automated SSL certificates for services running on Linux
+Automated encryption (SSL, etc) for services running on Linux
 
 ### Supported Services
 
