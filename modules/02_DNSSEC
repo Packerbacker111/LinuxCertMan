@@ -1,0 +1,45 @@
+#!/bin/bash
+
+# Make sure the file is there
+dnssecPath="/etc/bind/named.conf.views" #"/etc/bind/named.conf.views"
+touch $dnssecPath
+
+# Add DNSSEC rules to the top of the file
+dnssecConf=$(echo -e "dnssec-policy secure {
+    keys {
+         csk key-directory lifetime unlimited algorithm ecdsa256;
+    };
+
+    // Key timings
+    dnskey-ttl PT1H;
+    publish-safety PT1H;
+    retire-safety PT1H;
+    purge-keys P90D;
+
+    // Signature timings
+    signatures-refresh P5D;
+    signatures-validity P14D;
+    signatures-validity-dnskey P14D;
+
+    // Zone parameters
+    max-zone-ttl P1D;
+    zone-propagation-delay PT5M;
+    parent-ds-ttl P1D;
+    parent-propagation-delay PT1H;
+};"
+)
+# Place DNSSEC info on the top of the by making a tmp file
+echo "$dnssecConf" > tmp
+cat "$dnssecPath" >> tmp
+mv tmp "$dnssecPath" #/etc/bind/named.conf.views
+
+# Modify zones to suppoprt DNSSEC using the created DNSSEC rules
+
+
+# Alter the named.conf.options to enable DNSSEC 
+
+
+# Make sure permissions are set properly
+
+
+# Restart/Enable Bind9
