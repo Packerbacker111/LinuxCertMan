@@ -1,9 +1,20 @@
 #!/bin/bash
 
-# Make sure the file is there
-dnssecPath="/etc/bind/named.conf.views" #"/etc/bind/named.conf.views"
-touch $dnssecPath
+# Logging setup
+logFile="/var/log/lincertman.log"
+# Zones Dir
+zonesDir="/etc/bind/zones"
 
+# Set variable for the path for zone configuration after validating it exists
+if [ -f "/etc/bind/named.conf.default-zones" ]; then
+	dnssecPath="/etc/bind/named.conf.default-zones"
+elif [ -f "/etc/bind/named.conf.views" ]; then
+	dnssecPath="/etc/bind/named.conf.views"
+else
+	echo "This requires your configuration to exist in either named.conf.views or named.conf.default-zones! Please refer to documentation before running this script!"
+	echo "$(date +"%H:%M:%S %m:%d:%Y") | Error: Invalid Bind9 Config! Script will not run!" >> $logFile
+	exit 1
+fi
 # Add DNSSEC rules to the top of the file
 dnssecConf=$(echo -e "dnssec-policy secure {
     keys {
@@ -28,18 +39,31 @@ dnssecConf=$(echo -e "dnssec-policy secure {
     parent-propagation-delay PT1H;
 };"
 )
+
 # Place DNSSEC info on the top of the by making a tmp file
 echo "$dnssecConf" > tmp
 cat "$dnssecPath" >> tmp
-mv tmp "$dnssecPath" #/etc/bind/named.conf.views
+mv tmp "$dnssecPath" 
+echo "$(date +"%H:%M:%S %m:%d:%Y") | Config for DNSSEC 'secure' have been added" >> $logFile
 
 # Modify zones to suppoprt DNSSEC using the created DNSSEC rules
+sed -E -i '/file.*hints/! s/file /dnssec-policy secure;\n\tinline-signing yes;\n\tfile /' /etc/bind/named.conf.default-zones
+echo "$(date +"%H:%M:%S %m:%d:%Y") | Policy added for all zones!" >> $logFile
 
-
-# Alter the named.conf.options to enable DNSSEC 
-
-
+# Alter the named.conf.options to enable DNSSEC
+sed -i 's/^dnssec-validation.*/dnssec-validation auto;/' /etc/bind/named.conf.options
+echo "$(date +"%H:%M:%S %m:%d:%Y") | named.conf.options has been set to allow for DNSSEC Validation!" >> $logFile
 # Make sure permissions are set properly
+chown -R bind:bind /etc/bind
+echo "$(date +"%H:%M:%S %m:%d:%Y") | Permissions have been audited so that the bind user can take control over their directory and any files manipulated by this process" >> $logFile
 
+# Make AppArmor not mad at me for existing
+sed -i 's/\/etc\/bind\/\*\* r/\/etc\/bind\/\*\* rw/g' /etc/apparmor.d/usr.sbin.named
+apparmor_parser -R /etc/apparmor.d/usr.sbin.named
+service apparmor reload
 
 # Restart/Enable Bind9
+systemctl restart named
+systemctl enable named
+echo "$(date +"%H:%M:%S %m:%d:%Y") | The named (bind9) process has been restarted and enabled so changes can be reflected in the running service!" >> $logFile
+exit 0

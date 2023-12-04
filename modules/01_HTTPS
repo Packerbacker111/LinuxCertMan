@@ -1,1 +1,38 @@
 #!/bin/bash
+
+# Set logging variable
+logFile="/var/log/lincertman.log"
+
+# Make sure needed packages are installed
+apt install -y apache2 openssl
+echo "$(date +"%H:%M:%S %m:%d:%Y") | Needed Apache2 and openssl files were installed in the case they were not already" >> $logFile
+# Reconfig apache settings
+a2enmod ssl
+a2enmod rewrite
+echo "$(date +"%H:%M:%S %m:%d:%Y") | Reconfigured apache2 settings to allow ssl and rewrite modules to operate as they are needed for HTTPS" >>$logFile
+# Write over the apache2.conf
+echo "<Directory /var/www/html>
+	AllowOverride All
+</Directory>" >> /etc/apache2/apache2.conf
+echo "$(date +"%H:%M:%S %m:%d:%Y") | Creating Basic apache2.conf" >> $logFile
+# Make a directory for certs
+mkdir -p /etc/apache2/certificate
+cd /etc/apache2/certificate
+echo "$(date +"%H:%M:%S %m:%d:%Y") | Creating Certificate directory for certs!" >> $logFile
+# Create Cert + Key
+openssl req -new -newkey rsa:4096 -x509 -sha256 -days 365 -nodes -out apache-certificate.crt -keyout apache.key -subj /C=US/ST=Indiana/L=FortWayne/O=Script-Programming-Class/OU=IT/CN=*
+echo "$(date +"%H:%M:%S %m:%d:%Y") | Certs successfully created!" >> $logFile
+# Write over the default apache2 site config
+echo "<VirtualHost *:443>
+	ServerAdmin webmaster@localhost
+	DocumentRoot /var/www/html
+	ErrorLog \${APACHE_LOG_DIR}/error.log
+	CustomLog \${APACHE_LOG_DIR}/access.log combined
+	SSLEngine on
+	SSLCertificateFile /etc/apache2/certificate/apache-certificate.crt
+	SSLCertificateKeyFile /etc/apache2/certificate/apache.key
+</VirtualHost>" >> /etc/apache2/sites-enabled/000-default.conf
+echo "$(date +"%H:%M:%S %m:%d:%Y") | Site config created and set successfully!" >> $logFile
+# Restart apache2 so changes can take effect!
+systemctl restart apache2
+echo "$(date +"%H:%M:%S %m:%d:%Y") | Apache2 has been restarted!" >> $logFile

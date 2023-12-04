@@ -1,5 +1,15 @@
 #!/bin/bash
 
+# Set Up Error and Informational Logging
+logFile="/var/log/lincertman.log"
+touch $logFile
+
+# Verify the user running the script is UID 0 (Root); Otherwise exit. Running without root permissions makes this script not work
+[ "$(id -u)" != "0" ] && { echo "Error: Please run this script as root!"; exit 1; }
+
+# Install dialog cus TUI
+apt update && apt install dialog -y
+
 # Get a list of module files
 MODULE_FILES=("modules"/*)
 
@@ -9,7 +19,7 @@ MODULE_COUNT=${#MODULE_FILES[@]}
 # Check if there are no modules
 if [ $MODULE_COUNT -eq 0 ]; then
     echo "No modules found in the modules folder."
-    echo "$(date +"%H:%M:%S %m:%d:%Y") | Error: No Modules Found - Script Broken?" >> err.log
+    echo "$(date +"%H:%M:%S %m:%d:%Y") | Error: No Modules Found - Script Broken?" >> $logFile
     exit 1
 fi
 
@@ -31,11 +41,12 @@ CHOICE=$(dialog --clear --backtitle "LinuxCertMan.sh" --title "Please Select a C
 # Handle the user's choice
 if [ $? -eq 0 ]; then
     SELECTED_MODULE="${MODULE_FILES[CHOICE-1]}"
-    echo "You selected module: $SELECTED_MODULE"
-
+    echo "$(date +"%H:%M:%S %m:%d:%Y") | $SELECTED_MODULE was selected!" >> $logFile
+    ./$SELECTED_MODULE
     # Add your logic to run the selected module here
     # For example: ./"$SELECTED_MODULE"
 else
     echo "User canceled."
+    echo "$(date +"%H:%M:%S %m:%d:%Y") | User canceled operation of script!" >> $logFile
 fi
 
