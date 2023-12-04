@@ -1,14 +1,14 @@
-# Linux Certificate Manager (LinCertMan)
+# Linux Certificate Manager (LinuxCertMan)
 
 Author: Samuel Regelbrugge
 
-LinCertMan is a Bash script that simplifies SSL/TLS certificate management on Linux servers with Apache2 and BIND9 DNS. It offers modular functionality, including options for selecting certificate management tasks and configuring necessary services.
+LinuxCertMan is a Bash script that simplifies SSL/TLS certificate management on Linux servers with Apache2 and BIND9 DNS. It offers modular functionality, including options for selecting certificate management tasks and configuring necessary services.
 
 ## Features:
 
-- **Modular Operation:** LinCertMan operates through modular scripts, allowing users to select specific tasks for certificate management.
+- **Modular Operation:** LinuxCertMan operates through modular scripts, allowing users to select specific tasks for certificate management.
 
-- **Error and Informational Logging:** The script maintains a log file (`/var/log/lincertman.log`) for tracking script activities and potential issues.
+- **Error and Informational Logging:** The script maintains a log file (`/var/log/LinuxCertMan.log`) for tracking script activities and potential issues.
 
 ## Getting Started:
 Use git to clone the repo to your machine:
@@ -40,8 +40,8 @@ Select a module to perform specific certificate-related tasks.
 ## Notes:
 
 - Run the script with root permissions (`sudo` or as root user).
-- Review the log file (`/var/log/lincertman.log`) for detailed information.
-- LinCertMan is configured specifically for Debian-based systems; results may vary on other Linux distributions.
+- Review the log file (`/var/log/LinuxCertMan.log`) for detailed information.
+- LinuxCertMan is configured specifically for Debian-based systems; results may vary on other Linux distributions.
 - Ensure that your service applications match supported services!
   - Apache for web
   - Bind9 for DNS
