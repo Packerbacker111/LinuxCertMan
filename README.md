@@ -8,7 +8,7 @@ LinuxCertMan is a Bash script that simplifies SSL/TLS certificate management on 
 
 - **Modular Operation:** LinuxCertMan operates through modular scripts, allowing users to select specific tasks for certificate management.
 
-- **Error and Informational Logging:** The script maintains a log file (`/var/log/LinuxCertMan.log`) for tracking script activities and potential issues.
+- **Error and Informational Logging:** The script maintains a log file (`/var/log/lincertman.log`) for tracking script activities and potential issues.
 
 ## Getting Started:
 Use git to clone the repo to your machine:
